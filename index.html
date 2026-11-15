@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Нейрокреатив · панель</title>
+<link rel="stylesheet" href="app.css">
+<style>
+.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--soft);padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.top .now{display:flex;gap:10px;align-items:baseline;flex:1;min-width:0}
+.top .now b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .now small{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .tm{font-weight:800;font-size:22px;font-variant-numeric:tabular-nums}
+.top .tm.low{color:var(--red)}
+.top .me{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+.net{width:10px;height:10px;border-radius:50%;background:var(--green)}
+.net.off{background:var(--red)}
+.cardbar{background:var(--red);color:#fff;border-radius:16px;padding:12px 16px;font-weight:700;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.cardbar b{font-size:19px}
+.cardbar button{background:#fff;color:var(--red)}
+.wrap{max-width:1240px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px));display:grid;gap:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.pan{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:900px){.pan{grid-template-columns:1fr}}
+.col{display:grid;gap:16px;min-width:0}
+.bc{background:var(--soft);border-radius:24px;padding:18px;display:grid;gap:12px;position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto}
+@media (max-width:900px){.bc{position:static;max-height:none}}
+.bc>summary{list-style:none;cursor:pointer;font-weight:800;font-size:19px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bc summary::-webkit-details-marker{display:none}
+.bc .hint{font-size:13px;color:var(--muted)}
+.paste{background:var(--card);border-radius:16px;padding:12px;display:grid;gap:8px}
+.paste>summary{list-style:none;cursor:pointer;font-weight:700;font-size:15px}
+.paste textarea{font:inherit;font-size:14px;border:2px solid var(--soft-2);background:var(--bg);color:var(--ink);border-radius:12px;padding:9px 12px;width:100%;min-height:110px;resize:vertical}
+.paste textarea:focus{outline:none;border-color:var(--blue)}
+.fine{border-top:1px solid var(--soft-2);padding-top:10px;display:grid;gap:10px}
+.fine>summary{list-style:none;cursor:pointer;font-weight:700;font-size:14.5px}
+.fine>summary small{font-weight:500;color:var(--muted)}
+.prog{display:grid;gap:6px;font-size:14px;font-weight:700}
+.bar{height:10px;border-radius:999px;background:var(--card);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);border-radius:999px;transition:width .3s}
+/* мой результат дня */
+.res{background:var(--soft);border-radius:24px;padding:16px 18px;display:grid;gap:12px}
+.res h2{font-size:19px;font-weight:800;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.res h2 small{font-size:13.5px;color:var(--muted);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{border:0;padding:0;background:none;cursor:pointer;display:grid;gap:5px;text-align:center;color:var(--ink);font-family:var(--f)}
+.tile .th{aspect-ratio:4/5;border-radius:14px;border:2px dashed var(--soft-2);background:var(--card);display:grid;place-items:center;overflow:hidden;font-weight:800;font-size:18px;color:var(--muted);position:relative}
+.tile.ok .th{border:0}
+.tile .th img,.tile .th video{width:100%;height:100%;object-fit:cover;display:block}
+.tile .th .txtwork{width:100%;height:100%;font-size:9px;border-radius:0;text-align:left}
+.tile.ok .th::after{content:"✓";position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:grid;place-items:center}
+.tile.cur .th{border-color:var(--red)}
+.tile small{font-size:11.5px;font-weight:700;line-height:1.2}
+/* модули */
+.mods{display:grid;gap:12px}
+.mod{border-radius:24px;background:var(--soft);overflow:hidden}
+.mod.cur{box-shadow:0 0 0 3px var(--red)}
+.mod>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:12px 16px}
+.mod>summary::-webkit-details-marker{display:none}
+.mn{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:19px}
+.mt b{display:block;font-size:18px}
+.mt small{color:var(--muted);font-size:13.5px}
+.cnt{font-weight:700;font-size:13px;background:var(--card);border-radius:999px;padding:6px 10px;white-space:nowrap}
+.cnt.done{background:var(--green);color:#fff}
+.goal{margin:0 16px 10px;background:var(--card);border-radius:16px;padding:12px 14px;font-size:15px;border-left:5px solid var(--c,#999)}
+.goal b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.steps{display:grid;gap:10px;padding:0 16px 14px}
+.step{background:var(--card);border-radius:18px;padding:14px 16px;display:grid;gap:10px}
+.step.bonus{background:transparent;border:2px dashed var(--soft-2)}
+.bh{font-weight:800;font-size:15px;padding:6px 2px 0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.bh small{font-weight:500;color:var(--muted);font-size:13.5px}
+.sh{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.sh input{width:24px;height:24px;accent-color:#E60023;margin:2px 0 0;cursor:pointer}
+.sh b{font-size:15.5px;display:block}
+.sh span{font-size:14.5px;color:var(--muted)}
+.step.ok .sh b{text-decoration:line-through;text-decoration-color:var(--red)}
+.where{display:inline-block;font-size:12px;font-weight:700;background:var(--soft);border-radius:999px;padding:3px 9px;margin-right:6px;color:var(--ink);text-decoration:none}
+a.where{background:var(--blue);color:#fff}
+.tip{font-size:13.5px;background:rgba(0,166,126,.1);border-radius:12px;padding:8px 12px}
+.pv{display:grid;gap:6px}
+.pv>b{font-size:13px}
+.pr{background:var(--soft);border-radius:14px;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:13.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.pa{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pa button{border:0;border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer;background:var(--ink);color:var(--bg)}
+.pa button.done{background:var(--green);color:#fff}
+.drop{margin:0 16px 16px;border:2px dashed var(--soft-2);background:var(--card);border-radius:20px;padding:16px;display:grid;gap:10px}
+.drop.over{border-color:var(--red);background:rgba(230,0,35,.06)}
+.drop .dh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.drop .dh b{font-size:16px}
+.drop .dh small{color:var(--muted)}
+.drop .acts{display:flex;gap:8px;flex-wrap:wrap}
+.mine{display:flex;gap:8px;flex-wrap:wrap}
+.mine>div{width:92px;border-radius:12px;overflow:hidden;background:var(--soft)}
+.mine img,.mine video{display:block;width:100%;height:92px;object-fit:cover}
+.up{height:8px;border-radius:999px;background:var(--soft);overflow:hidden}
+.up i{display:block;height:100%;background:var(--blue);width:0}
+/* забрать домой */
+.home{background:var(--soft);border-radius:24px;padding:18px;display:grid;gap:10px}
+.home.hot{box-shadow:0 0 0 3px var(--red)}
+.home h2{font-size:19px;font-weight:800}
+.home ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14.5px}
+/* вход */
+.join{max-width:460px;margin:8vh auto;padding:0 16px;display:grid;gap:14px;text-align:center}
+.join h1{font-size:32px}
+.join .promise{background:var(--soft);border-radius:20px;padding:14px 16px;font-size:15.5px;text-align:left}
+.join .promise b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.join form{display:grid;gap:12px;text-align:left;background:var(--soft);border-radius:24px;padding:20px}
+.join .fld input{font-size:17px;padding:12px 14px}
+/* стена */
+.wall{columns:4 200px;column-gap:14px}
+.pin{break-inside:avoid;margin-bottom:16px}
+.pin .ph{position:relative;border-radius:16px;overflow:hidden;background:var(--soft)}
+.pin img,.pin video{display:block;width:100%}
+.pin .heart{position:absolute;top:10px;right:10px;border:0;border-radius:999px;padding:8px 13px;font-weight:800;font-size:14px;cursor:pointer;background:rgba(255,255,255,.95);color:#111}
+.pin .heart.on{background:var(--red);color:#fff}
+.pin .who{font-size:14px;font-weight:700;padding:6px 4px 0}
+.pin .who small{color:var(--muted);font-weight:500}
+/* шпаргалка */
+.help{columns:3 280px;column-gap:14px}
+.hc{break-inside:avoid;background:var(--soft);border-radius:20px;padding:16px;margin-bottom:14px;display:grid;gap:6px;font-size:14.5px}
+.hc h3{font-size:16.5px;font-weight:800}
+.hc kbd{font-family:var(--f);font-weight:700;background:var(--card);border-radius:6px;padding:1px 6px;border:1px solid var(--soft-2)}
+.ratios{display:flex;gap:14px;align-items:flex-end;padding-top:4px}
+.ratios span{display:grid;gap:4px;justify-items:center;font-size:12.5px;font-weight:700}
+.ratios i{display:block;background:var(--ink);border-radius:4px}
+.mod,.step{scroll-margin-top:84px}
+@media (max-width:520px){.top .now small{display:none}}
+/* зал и постоянный адрес */
+.zal{background:var(--red);color:#fff;border-radius:24px;padding:20px;display:grid;gap:10px;text-align:center}
+.zal h2{font-size:24px;font-weight:800}
+.zal a{background:#fff;color:var(--red);text-decoration:none;font-size:19px;padding:15px 22px;justify-self:center}
+.zalbar{background:var(--red);color:#fff;border-radius:16px;padding:12px 16px;font-weight:700;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.zalbar a{background:#fff;color:var(--red);text-decoration:none}
+body.offline .res,body.offline .tm,body.offline .net,body.offline [data-t=wall]{display:none!important}
+/* праздник */
+.conf{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.conf i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.6}}
+</style>
+</head>
+<body>
+<section id="join" class="join" hidden>
+  <div class="zal" id="zalbox" hidden><h2>Вы на интенсиве</h2><p>Нажмите, чтобы войти в панель зала: в ней шаги, таймер и сдача работ на большой экран.</p><a class="pill" id="zal-go" href="#">Войти в панель зала</a></div>
+  <h1>Нейрокреатив</h1>
+  <p style="color:var(--muted)">Ваша панель на весь день. Здесь шаги, готовые промпты под ваш бизнес и сдача работ на большой экран. Ничего не нужно уметь: идём вместе, по одному шагу.</p>
+  <div class="promise"><b>Что вы унесёте домой</b><span id="j-result"></span></div>
+  <form id="join-form">
+    <div class="fld"><label for="j-name">Как вас зовут</label><input id="j-name" required maxlength="30" autocomplete="given-name" placeholder="Марина"></div>
+    <div class="fld"><label for="j-niche">Чем вы занимаетесь</label><input id="j-niche" maxlength="80" placeholder="консультации по питанию для мам"></div>
+    <button class="pill red" type="submit" style="font-size:17px;padding:13px 18px">Поехали</button>
+    <small style="color:var(--muted)">Работает и на ноутбуке, и на телефоне. С телефона удобно сдавать видео.</small>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="now"><b id="blk">…</b><small id="nxt"></small></div>
+    <span class="tm" id="tm">--:--</span>
+    <span class="me"><i class="net" id="net" title="Связь с залом"></i><span id="me-name"></span></span>
+  </header>
+  <main class="wrap">
+    <div class="zalbar" id="zalbar" hidden><span>Вы в зале. Сдавать работы и видеть таймер — в панели зала</span><a class="pill" href="#" data-zal>Открыть панель зала</a></div>
+    <div class="cardbar" id="cardbar" hidden><span>Карта-вызов: <b id="cardtxt"></b></span><span style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">Стиль уже стоит в промпте<button class="pill" type="button" id="cardgo">Открыть шаг</button></span></div>
+    <div class="tabs" role="tablist">
+      <button class="pill" role="tab" aria-selected="true" data-t="steps">Мои шаги</button>
+      <button class="pill" role="tab" aria-selected="false" data-t="wall">Стена зала · голос</button>
+      <button class="pill" role="tab" aria-selected="false" data-t="help">Шпаргалка</button>
+    </div>
+    <section id="t-steps" class="pan">
+      <details class="bc" id="bc" open>
+        <summary>Моя бренд-карта <span id="bc-fill" style="font-size:13px;color:var(--muted)"></span></summary>
+        <p class="hint">Всё, что вы впишете, само встанет в промпты: <span class="v">синим</span> — ваше, <span class="d">серым</span> — подставлено по умолчанию.</p>
+        <details class="paste" id="paste">
+          <summary>Вставьте ответ ИИ — карта заполнится сама</summary>
+          <textarea id="paste-t" placeholder="Скопируйте сюда ответ чата из модуля «Основы», шаг 1"></textarea>
+          <button class="pill red" type="button" id="paste-go" style="justify-self:start">Заполнить карту</button>
+        </details>
+        <div id="bc-main" style="display:grid;gap:10px"></div>
+        <details class="fine"><summary>Тонкая настройка <small>можно не трогать</small></summary><div id="bc-fine" style="display:grid;gap:10px"></div></details>
+        <div class="prog"><span id="pg-txt">Готово 0 шагов</span><div class="bar"><i id="pg-bar"></i></div></div>
+        <button class="pill" type="button" id="logout" style="justify-self:start;font-size:13px;padding:7px 12px">Это не я</button>
+      </details>
+      <div class="col">
+        <div class="res"><h2>Мой результат дня <small id="res-n"></small></h2><div class="tiles" id="tiles"></div></div>
+        <div class="mods" id="mods"></div>
+        <div class="home" id="home">
+          <h2>Забрать домой</h2>
+          <p style="font-size:14.5px;color:var(--muted)" id="home-txt">Все промпты дня, уже с вашей бренд-картой, одним файлом.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill red" type="button" id="book">Скачать мою книгу промптов</button><a class="pill dark" id="site-go" href="#" hidden style="text-decoration:none">Открыть постоянную панель</a></div>
+          <b style="font-size:15px;margin-top:6px">План на неделю после интенсива</b>
+          <ol id="after"></ol>
+        </div>
+      </div>
+    </section>
+    <section id="t-wall" hidden>
+      <p style="color:var(--muted);margin-bottom:14px" id="votes-left"></p>
+      <div class="wall" id="wall"></div>
+    </section>
+    <section id="t-help" hidden>
+      <div class="help">
+        <div class="hc"><h3>Что такое промпт</h3><p>Это просьба к нейросети обычными словами. Чем подробнее просьба, тем ближе результат к тому, что вы представили. Наши промпты уже написаны, вам нужно только скопировать.</p></div>
+        <div class="hc"><h3>Скопировать и вставить</h3><p>1. Нажмите «Скопировать» под промптом.</p><p>2. Щёлкните в поле ввода нейросети.</p><p>3. Вставьте: на Mac <kbd>⌘</kbd>+<kbd>V</kbd>, на Windows <kbd>Ctrl</kbd>+<kbd>V</kbd>. На телефоне: долгое нажатие → «Вставить».</p></div>
+        <div class="hc"><h3>Сохранить картинку</h3><p>Стрелка ↓ рядом с картинкой или правый щелчок → «Сохранить изображение». Файл окажется в папке <b>«Загрузки»</b>.</p></div>
+        <div class="hc"><h3>Прикрепить картинку к промпту</h3><p>Ищите скрепку 📎, «+» или значок картинки рядом с полем ввода. Выберите файл из «Загрузок», потом вставьте промпт. Так нейросеть знает, кого или что сохранить.</p></div>
+        <div class="hc"><h3>Сдать работу</h3><p>Внизу каждого модуля нажмите «Выбрать файл» → «Загрузки» → ваш файл. На ноутбуке можно просто перетащить файл в рамку. Работа сразу появится на большом экране.</p></div>
+        <div class="hc"><h3>Формат кадра</h3><div class="ratios"><span><i style="width:32px;height:40px"></i>4:5 пост</span><span><i style="width:27px;height:48px"></i>9:16 рилс</span><span><i style="width:56px;height:32px"></i>16:9 слайд</span><span><i style="width:36px;height:36px"></i>1:1</span></div><p>Если генератор спрашивает размер, выбирайте тот, что указан в шаге.</p></div>
+        <div class="hc"><h3>Вышло странно</h3><p>Шесть пальцев, кривые буквы, чужое лицо — это нормально, так бывает у всех. Нажмите ещё раз или попросите словами: «исправь руки», «убери надпись».</p></div>
+        <div class="hc"><h3>Нейросеть не отвечает</h3><p>Очередь или закончился лимит: подождите минуту или откройте запасную вкладку. Для видео есть план Б: картинка в редакторе с медленным приближением.</p></div>
+        <div class="hc"><h3>Снимок экрана</h3><p>Mac: <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>4</kbd> и выделите область. Windows: <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>.</p></div>
+        <div class="hc"><h3>Перекинуть файл на телефон</h3><p>AirDrop между iPhone и Mac. Или отправьте себе в Telegram, в «Избранное», и скачайте на телефоне.</p></div>
+        <div class="hc"><h3>Нейросети на сегодня</h3><div id="tools" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+        <div class="hc"><h3>Если застряли</h3><p>Нажмите «Застрял» внизу модуля. Помощник увидит вас на экране и подойдёт. Стесняться нечего: для этого мы здесь.</p></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="program.js"></script>
+<script src="common.js"></script>
+<script>
+(function(){
+  const {P,esc,$,fillHTML,fillTxt,prompts,tool,fmt,live,left,post,toast,media}=NK;
+  const LS=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
+  const SS=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  let me=LS('nk-me',null);
+  let card=LS('nk-card',{}),ticks=LS('nk-ticks',{}),openMod=LS('nk-open','01');
+  let st=null,myVotes=[],autoOpened='',imported=false;
+  let HALL=false, SITE='', ZAL='';
+  // ?zal=адрес:порт приходит из QR на экране зала, помним его 14 часов
+  const zp=new URLSearchParams(location.search).get('zal');
+  if(zp&&/^[\w.\-]+:\d{2,5}$/.test(zp)) SS('nk-zal',{h:zp,at:Date.now()});
+  { const z=LS('nk-zal',null); if(z&&Date.now()-z.at<14*3600e3) ZAL=z.h; }
+  // перенос имени, бренд-карты и галочек между постоянным адресом и залом: #j=…
+  const pack=()=>encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify({id:me.id,name:me.name,niche:me.niche,card,ticks})))));
+  function importHash(){
+    const m=location.hash.match(/^#j=(.+)$/); if(!m) return;
+    try{ const d=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+      const id=String(d.id||'').replace(/[^a-z0-9]/gi,'').slice(0,20), name=String(d.name||'').trim().slice(0,30);
+      if(id&&name){ me={id,name,niche:String(d.niche||'').slice(0,40)}; SS('nk-me',me); }
+      if(d.card&&typeof d.card==='object'){ card={}; P.fields.forEach(f=>{ if(typeof d.card[f.k]==='string') card[f.k]=d.card[f.k].slice(0,200); }); SS('nk-card',card); }
+      if(d.ticks&&typeof d.ticks==='object'){ ticks={}; Object.keys(d.ticks).slice(0,200).forEach(k=>{ if(/^\d\d-\d+$/.test(k)) ticks[k]=!!d.ticks[k]; }); SS('nk-ticks',ticks); }
+      imported=true;
+    }catch(e){}
+    history.replaceState(null,'',location.pathname+location.search);
+  }
+  const zalURL=()=>'http://'+ZAL+'/'+(me&&me.id?'#j='+pack():'');
+  document.addEventListener('click',e=>{ const a=e.target.closest('[data-zal],#zal-go'); if(a&&ZAL){ a.href=zalURL(); } const s=e.target.closest('#site-go'); if(s&&SITE&&me){ s.href=SITE+'#j='+pack(); } },true);
+  const MAIN=P.fields.filter(f=>f.main), FINE=P.fields.filter(f=>!f.main);
+  const data=()=>Object.assign({},card,{vyzov:HALL?(st&&st.hall.card||''):'любой стиль, например: '+P.cards[0]});
+
+  // ---------- вход ----------
+  $('j-result').textContent=P.result+'.';
+  function showJoin(){ $('join').hidden=false; $('app').hidden=true; $('zalbox').hidden=HALL||!ZAL; if(!ZAL||HALL) $('j-name').focus(); }
+  $('join-form').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const name=$('j-name').value.trim(); if(!name) return;
+    const biz=$('j-niche').value.trim();
+    me={id:(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now()).replace(/-/g,'').slice(0,20),name,niche:biz.slice(0,40)};
+    try{ if(HALL) await post('api/join',me); SS('nk-me',me); if(biz&&!card.biz){ card.biz=biz; SS('nk-card',card); if(HALL) post('api/me',{id:me.id,card,ticks}).catch(()=>{}); } start(); }catch(err){ toast(err.message); }
+  });
+  $('logout').onclick=()=>{ try{['nk-me','nk-card','nk-ticks'].forEach(k=>localStorage.removeItem(k))}catch(e){} location.reload(); };
+
+  async function start(){
+    $('join').hidden=true; $('app').hidden=false; $('me-name').textContent=me.name;
+    $('after').innerHTML=(P.after||[]).map(a=>`<li>${esc(a)}</li>`).join('');
+    $('tools').innerHTML=Object.values(P.tools||{}).filter(t=>t.u||t.n!=='Эта панель').map(chip).join('');
+    if(!HALL){
+      // постоянный адрес: без сервера, всё хранится в браузере участника
+      $('blk').textContent='Нейрокреатив'; $('nxt').textContent='ваша панель, всегда по этому адресу';
+      $('zalbar').hidden=!ZAL;
+      $('home-txt').textContent='Эта страница всегда открывается по этому адресу, бренд-карта хранится в вашем браузере. Сохраните её в закладки. Книга промптов — то же самое одним файлом.';
+      renderCard(); renderMods(); return;
+    }
+    $('site-go').hidden=!SITE;
+    if(SITE) $('home-txt').textContent='Все промпты дня с вашей бренд-картой одним файлом. А ещё панель всегда доступна по постоянному адресу: кнопка ниже откроет её и перенесёт вашу карту.';
+    // сервер — главный источник: подтягиваем карту и галочки, если зашли с другого браузера
+    try{ const r=await fetch('api/me?id='+encodeURIComponent(me.id)); if(r.ok&&!imported){ const j=await r.json(); if(j.me){ if(Object.keys(j.me.card||{}).length) card=j.me.card; if(Object.keys(j.me.ticks||{}).length) ticks=j.me.ticks; } } else { await post('api/join',me); if(imported) post('api/me',{id:me.id,card,ticks}).catch(()=>{}); } }catch(e){}
+    try{ myVotes=(await (await fetch('api/myvotes?id='+encodeURIComponent(me.id))).json()).mine||[] }catch(e){}
+    renderCard(); renderMods();
+    live(s=>{st=s;onState()},ok=>$('net').classList.toggle('off',!ok));
+    setInterval(tick,1000);
+  }
+  function chip(t){ if(!t) return ''; return t.u?`<a class="where" href="${esc(t.u)}" target="_blank" rel="noopener">${esc(t.n)} ↗</a>`:`<span class="where">${esc(t.n)}</span>`; }
+
+  // ---------- бренд-карта ----------
+  const fld=f=>`<div class="fld"><label for="bc-${f.k}">${esc(f.l)}</label><input id="bc-${f.k}" data-k="${f.k}" maxlength="200" placeholder="${f.main?'например: '+esc(f.ex):'если пусто: '+esc(f.def)}" value="${esc(card[f.k]||'')}"></div>`;
+  function renderCard(){
+    $('bc-main').innerHTML=MAIN.map(fld).join('');
+    $('bc-fine').innerHTML=FINE.map(fld).join('');
+    fillCount();
+  }
+  function fillCount(){ const n=MAIN.filter(f=>(card[f.k]||'').trim()).length, x=FINE.filter(f=>(card[f.k]||'').trim()).length; $('bc-fill').textContent=n+' из '+MAIN.length+(x?' · +'+x:''); $('paste').open=n<3; }
+  let saveT;
+  const save=()=>{ SS('nk-card',card); SS('nk-ticks',ticks); clearTimeout(saveT); if(HALL) saveT=setTimeout(()=>post('api/me',{id:me.id,card,ticks}).catch(()=>{}),600); };
+  const refreshPrompts=()=>{ const d=data(); document.querySelectorAll('.pr[data-id]').forEach(el=>{ const [n,j,k]=el.dataset.id.split('-'); el.innerHTML=fillHTML(prompts(NK.mod(n).steps[+j])[+k].p,d); }); };
+  $('bc').addEventListener('input',e=>{ const k=e.target.dataset.k; if(!k) return; card[k]=e.target.value; fillCount(); save(); refreshPrompts(); });
+  // разбор ответа ИИ: строки вида «ГЕРОЙ: …», с маркерами списка и жирным шрифтом
+  $('paste-go').onclick=()=>{
+    const t=$('paste-t').value; let n=0;
+    P.fields.forEach(f=>{ if(!f.tag) return;
+      const m=t.match(new RegExp('^[\\s>#*\\-–•\\d.)]*\\**\\s*'+f.tag+'\\s*\\**\\s*[:：—–-]\\s*(.+)$','im'));
+      if(m){ const v=m[1].replace(/\*+/g,'').trim().slice(0,200); if(v){ card[f.k]=v; n++; } } });
+    if(!n){ toast('Не нашлось пунктов. Попросите ИИ: «Оформи бренд-карту строго по пунктам»'); return; }
+    $('paste-t').value=''; renderCard(); save(); refreshPrompts(); toast('Заполнено полей: '+n+'. Проверьте и поправьте, если нужно'); confetti(30);
+  };
+
+  // ---------- модули ----------
+  const myWorks=n=>st?st.works.filter(w=>w.pid===me.id&&w.mod===n):[];
+  const sosOn=()=>st&&st.sos.some(x=>x.pid===me.id);
+  function stepHTML(m,s,j,d){
+    const id=m.n+'-'+j, ps=prompts(s);
+    return `<div class="step ${s.b?'bonus':''} ${ticks[id]?'ok':''}" id="s-${id}"><div class="sh"><input type="checkbox" id="st-${id}" data-id="${id}" ${ticks[id]?'checked':''} aria-label="Готово"><label for="st-${id}"><b>${esc(s.h)}</b><span>${s.w?chip(tool(s.w)):''}${esc(s.x||'')}</span></label></div>`+
+      ps.map((v,k)=>`<div class="pv">${v.l?`<b>${esc(v.l)}</b>`:''}<div class="pr" data-id="${id}-${k}">${fillHTML(v.p,d)}</div><div class="pa"><button type="button" data-copy="${id}-${k}">Скопировать${ps.length>1?' «'+esc(v.l)+'»':' промпт'}</button></div></div>`).join('')+
+      (s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:'')+`</div>`;
+  }
+  function renderMods(){
+    let all=0,done=0,bon=0;
+    const cur=st?P.blocks[st.hall.bi].m:'', d=data();
+    $('mods').innerHTML=P.modules.map(m=>{
+      const idx=m.steps.map((s,j)=>[s,j]), main=idx.filter(([s])=>!s.b), extra=idx.filter(([s])=>s.b);
+      const c=main.filter(([,j])=>ticks[m.n+'-'+j]).length; all+=main.length; done+=c; bon+=extra.filter(([,j])=>ticks[m.n+'-'+j]).length;
+      const sub=myWorks(m.n);
+      const acc=m.accept==='text'?'':m.accept.split(',').map(a=>a+'/*').join(',');
+      return `<details class="mod ${cur===m.n?'cur':''}" data-n="${m.n}" id="m-${m.n}" ${openMod===m.n?'open':''}>
+      <summary><span class="mn" style="background:${m.color}">${m.n}</span><span class="mt"><b>${esc(m.t)}</b><small>${m.time} · ${main.length} шагов${extra.length?' + '+extra.length+' по желанию':''}${sub.length?' · сдано ✓':''}</small></span><span class="cnt ${c===main.length?'done':''}">${c}/${main.length}</span></summary>
+      ${m.goal?`<div class="goal" style="--c:${m.color}"><b>Что получится</b>${esc(m.goal)}</div>`:''}
+      <div class="steps">${main.map(([s,j])=>stepHTML(m,s,j,d)).join('')}
+        ${extra.length?`<div class="bh">★ Если успеваете <small>для тех, кто сделал главное. Можно пропустить.</small></div>`+extra.map(([s,j])=>stepHTML(m,s,j,d)).join(''):''}</div>
+      ${!HALL?`<div class="drop"><div class="dh"><span><b>Сдача: ${esc(m.label)}</b> <small>${ZAL?'на большой экран — через панель зала':'на интенсиве работы сдаются в панели зала'}</small></span>${ZAL?`<span class="acts"><a class="pill red" href="#" data-zal style="text-decoration:none">Сдать на экран зала</a></span>`:''}</div></div>`:`<div class="drop" data-drop="${m.n}">
+        <div class="dh"><span><b>Сдача: ${esc(m.label)}</b> <small>${m.accept==='text'?'отправится ваша бренд-карта':(m.ratio&&m.ratio!=='любой'?'формат '+m.ratio+' · ':'')+'нажмите или перетащите файл сюда'}</small></span>
+          <span class="acts">${m.accept==='text'?`<button class="pill red" type="button" data-sendcard="${m.n}">Сдать бренд-карту</button>`:`<label class="pill red" style="display:inline-block">Выбрать файл<input type="file" accept="${acc}" data-file="${m.n}" hidden></label>`}
+          <button class="pill" type="button" data-sos="${m.n}">${sosOn()?'Помощник идёт · отменить':'Застрял'}</button></span></div>
+        <div class="up" hidden><i></i></div>
+        ${sub.length?`<div class="mine">${sub.map(w=>`<div>${media(w,{autoplay:false})}</div>`).join('')}</div>`:''}
+      </div>`}</details>`}).join('');
+    $('pg-txt').textContent=`Главных шагов: ${done} из ${all}`+(bon?` · ★ ${bon}`:''); $('pg-bar').style.width=(all?done/all*100:0)+'%';
+    renderTiles();
+  }
+  function renderTiles(){
+    const cur=st?P.blocks[st.hall.bi].m:''; let n=0;
+    $('tiles').innerHTML=P.modules.map(m=>{ const ws=myWorks(m.n); const w=m.n==='03'?ws[0]:ws[ws.length-1]; if(w) n++;
+      return `<button type="button" class="tile ${w?'ok':''} ${cur===m.n?'cur':''}" data-goto="${m.n}"><span class="th">${w?media(w,{autoplay:false}):m.n}</span><small>${esc(m.label)}</small></button>`; }).join('');
+    $('res-n').textContent=n===P.modules.length?'всё собрано 🎉':`собрано ${n} из ${P.modules.length}`;
+  }
+  function goMod(n,stepSel){ openMod=n; SS('nk-open',n); const el=$('m-'+n); if(!el) return; el.open=true; const t=stepSel?document.querySelector(stepSel)||el:el; t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  $('tiles').addEventListener('click',e=>{ const b=e.target.closest('[data-goto]'); if(b) goMod(b.dataset.goto); });
+  $('cardgo').onclick=()=>{ const m=NK.mod('03'); const j=m.steps.findIndex(s=>prompts(s).some(v=>v.p.includes('{vyzov}'))); goMod('03','#s-03-'+j); };
+  $('mods').addEventListener('change',e=>{
+    const id=e.target.dataset.id; if(id){ ticks[id]=e.target.checked; save(); const y=window.scrollY; renderMods(); window.scrollTo(0,y); if(e.target.checked) checkModDone(id.split('-')[0]); return; }
+    const f=e.target.dataset.file; if(f&&e.target.files[0]) upload(f,e.target.files[0]);
+  });
+  function checkModDone(n){ const m=NK.mod(n); const main=m.steps.map((s,j)=>[s,j]).filter(([s])=>!s.b); if(main.every(([,j])=>ticks[n+'-'+j])){ toast('Модуль «'+m.t+'» пройден! Вы молодец'); confetti(50); } }
+  $('mods').addEventListener('toggle',e=>{ if(e.target.open&&e.target.dataset.n){ openMod=e.target.dataset.n; SS('nk-open',openMod); } },true);
+  $('mods').addEventListener('click',async e=>{
+    const cp=e.target.closest('[data-copy]');
+    if(cp){ const [n,j,k]=cp.dataset.copy.split('-'); const src=prompts(NK.mod(n).steps[+j])[+k].p;
+      if(HALL&&src.includes('{vyzov}')&&!(st&&st.hall.card)){ toast('Ведущий ещё не вытянул карту. Подождите минуту'); return; }
+      const txt=fillTxt(src,data());
+      try{ await navigator.clipboard.writeText(txt); cp.textContent='Скопировано ✓'; cp.classList.add('done'); setTimeout(()=>{cp.textContent='Скопировать ещё раз';cp.classList.remove('done')},1800); toast('Скопировано. Теперь вставьте в нейросеть: ⌘V или Ctrl+V'); }
+      catch(err){ const el=document.querySelector(`.pr[data-id="${cp.dataset.copy}"]`); const r=document.createRange(); r.selectNodeContents(el); getSelection().removeAllRanges(); getSelection().addRange(r); toast('Текст выделен, нажмите ⌘C или Ctrl+C'); } }
+    const sc=e.target.closest('[data-sendcard]');
+    if(sc){ const filled=P.fields.filter(f=>(card[f.k]||'').trim()); if(filled.length<3){ toast('Заполните хотя бы 3 поля: проще всего вставить ответ ИИ в карту'); goMod('02'); $('paste').open=true; return; }
+      const text=P.fields.map(f=>f.l+': '+((card[f.k]||'').trim()||f.def+' (по умолчанию)')).join('\n');
+      try{ await fetch('api/submit?id='+encodeURIComponent(me.id)+'&mod='+sc.dataset.sendcard,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})}).then(r=>{if(!r.ok)throw 0}); toast('Бренд-карта сдана!'); confetti(40); }catch(err){ toast('Не отправилось, попробуйте ещё раз'); } }
+    const so=e.target.closest('[data-sos]');
+    if(so){ try{ const on=sosOn(); await post('api/sos',{id:me.id,mod:so.dataset.sos,off:on}); toast(on?'Отменили, помощник не придёт':'Помощник уже видит вас и скоро подойдёт'); }catch(err){ toast(err.message); } }
+  });
+  // перетаскивание файла
+  $('mods').addEventListener('dragover',e=>{ const d=e.target.closest('[data-drop]'); if(!d||NK.mod(d.dataset.drop).accept==='text') return; e.preventDefault(); d.classList.add('over'); });
+  $('mods').addEventListener('dragleave',e=>{ const d=e.target.closest('[data-drop]'); if(d) d.classList.remove('over'); });
+  $('mods').addEventListener('drop',e=>{ const d=e.target.closest('[data-drop]'); if(!d) return; e.preventDefault(); d.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) upload(d.dataset.drop,f); });
+
+  // картинки уменьшаем до 1600px, чтобы стена зала не тормозила; видео отправляем как есть
+  async function shrink(file){
+    if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+    try{
+      const bmp=await createImageBitmap(file); const k=Math.min(1,1600/Math.max(bmp.width,bmp.height));
+      const c=document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+      c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+      return await new Promise(ok=>c.toBlob(b=>ok(b||file),'image/jpeg',.88));
+    }catch(e){ return file; }
+  }
+  async function upload(n,file){
+    const m=NK.mod(n); const kind=file.type.split('/')[0];
+    const okType=m.accept.split(',').includes(kind)||(file.type==='application/pdf'&&m.n==='04');
+    if(!okType){ toast(m.accept==='video'?'Сюда нужно видео':'Сюда нужна картинка'+(m.accept.includes('video')?' или видео':'')); return; }
+    if(file.size>200*1024*1024){ toast('Файл больше 200 МБ, сожмите его'); return; }
+    const blob=kind==='image'?await shrink(file):file;
+    const drop=document.querySelector(`[data-drop="${n}"]`); const bar=drop&&drop.querySelector('.up');
+    if(bar){ bar.hidden=false; bar.firstElementChild.style.width='0'; }
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST','api/submit?id='+encodeURIComponent(me.id)+'&mod='+n);
+    xhr.setRequestHeader('Content-Type',blob.type||file.type);
+    xhr.upload.onprogress=e=>{ if(bar&&e.lengthComputable) bar.firstElementChild.style.width=(e.loaded/e.total*100)+'%'; };
+    xhr.onload=()=>{ if(xhr.status===200){ toast(m.hideOnWall?'Кадр «до» сохранён. Покажем вечером':'Сдано! Ваша работа уже на большом экране'); confetti(60); } else { let msg='Не получилось отправить'; try{msg=JSON.parse(xhr.responseText).error||msg}catch(e){} toast(msg); } if(bar) bar.hidden=true; };
+    xhr.onerror=()=>{ toast('Нет связи с залом, проверьте Wi-Fi'); if(bar) bar.hidden=true; };
+    xhr.send(blob);
+  }
+
+  // ---------- праздник ----------
+  function confetti(n){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box=document.createElement('div'); box.className='conf'; const cs=['#E60023','#0074E8','#00A67E','#FFB800','#8A4FFF'];
+    for(let i=0;i<n;i++){ const p=document.createElement('i'); p.style.left=Math.random()*100+'%'; p.style.background=cs[i%cs.length]; p.style.animationDelay=Math.random()*.4+'s'; p.style.animationDuration=1.2+Math.random()*.9+'s'; box.appendChild(p); }
+    document.body.appendChild(box); setTimeout(()=>box.remove(),2600);
+  }
+
+  // ---------- книга промптов ----------
+  $('book').onclick=()=>{
+    const d=data(), L=[];
+    L.push('КНИГА ПРОМПТОВ · '+me.name,'Интенсив «Нейрокреатив», '+new Date().toLocaleDateString('ru-RU'),'','Как пользоваться: скопируйте промпт и вставьте в нейросеть. Хотите другой кадр — поменяйте слова в бренд-карте ниже и в промпте.','');
+    L.push('МОЯ БРЕНД-КАРТА'); P.fields.forEach(f=>L.push('· '+f.l+': '+((card[f.k]||'').trim()||f.def)));
+    L.push('','ФОРМУЛА КАДРА (ставьте в конец любого промпта для картинок)',fillTxt(P.tail,d),'');
+    P.modules.forEach(m=>{ L.push('','==== '+m.n+' · '+m.t.toUpperCase()+' ===='); m.steps.forEach(s=>{ const ps=prompts(s); if(!ps.length) return; L.push('',(s.b?'★ ':'')+s.h+(s.w&&tool(s.w)?' — '+tool(s.w).n:'')); ps.forEach(v=>{ if(v.l) L.push('['+v.l+']'); L.push(v.p.includes('{vyzov}')&&!d.vyzov?fillTxt(v.p,Object.assign({},d,{vyzov:'ЛЮБОЙ СТИЛЬ, НАПРИМЕР: '+P.cards[0]})):fillTxt(v.p,d)); }); }); });
+    L.push('','==== ПЛАН НА НЕДЕЛЮ ====',...(P.after||[]));
+    const blob=new Blob(['﻿'+L.join('\n')],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Нейрокреатив — промпты — '+me.name+'.txt'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+    toast('Файл в папке «Загрузки»');
+  };
+
+  // ---------- стена и голосование ----------
+  function renderWall(){
+    if(!st) return;
+    const hidden=new Set(P.modules.filter(m=>m.hideOnWall).map(m=>m.n));
+    const ws=st.works.filter(w=>w.kind!=='text'&&!hidden.has(w.mod)).slice().reverse();
+    const ppl=Object.fromEntries(st.people.map(p=>[p.id,p]));
+    $('votes-left').textContent=`У вас ${P.votesPerPerson-myVotes.length} из ${P.votesPerPerson} сердечек. Нажмите ♥ на работе, которая понравилась, нажмите ещё раз, чтобы снять.`;
+    $('wall').innerHTML=ws.map(w=>{const p=ppl[w.pid]||{name:'?',niche:''};const mine=w.pid===me.id;const on=myVotes.includes(w.wid);
+      return `<div class="pin"><div class="ph">${media(w)}${mine?'':`<button class="heart ${on?'on':''}" type="button" data-vote="${w.wid}" aria-pressed="${on}">♥ ${w.votes}</button>`}</div><div class="who">${esc(p.name)} <small>${esc(p.niche)} · ${esc(NK.mod(w.mod).label)}</small></div></div>`}).join('')||'<p style="color:var(--muted)">Пока никто ничего не сдал.</p>';
+  }
+  $('wall').addEventListener('click',async e=>{ const b=e.target.closest('[data-vote]'); if(!b) return;
+    try{ const j=await post('api/vote',{id:me.id,wid:b.dataset.vote}); myVotes=j.mine; renderWall(); }catch(err){ toast(err.message); } });
+  const showTab=t=>{ document.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.t===t))); ['steps','wall','help'].forEach(k=>$('t-'+k).hidden=k!==t); if(t==='wall') renderWall(); };
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+
+  // ---------- живое состояние ----------
+  let lastSig='',lastBi=-1;
+  function onState(){
+    const b=P.blocks[st.hall.bi], nx=P.blocks[st.hall.bi+1];
+    $('blk').textContent=b.name; $('nxt').textContent=b.t+(nx?' · дальше: '+nx.name:'');
+    $('cardbar').hidden=!st.hall.card; $('cardtxt').textContent=st.hall.card||'';
+    $('home').classList.toggle('hot',!!b.home);
+    if(b.m&&autoOpened!==b.m){ autoOpened=b.m; openMod=b.m; SS('nk-open',openMod); }
+    if(lastBi!==-1&&lastBi!==st.hall.bi&&b.vote) showTab('wall');
+    lastBi=st.hall.bi;
+    // перерисовываем модули только если поменялось что-то моё, чтобы не сбивать ввод
+    const sig=st.hall.bi+'|'+st.works.filter(w=>w.pid===me.id).length+'|'+sosOn()+'|'+(st.hall.card||'');
+    if(sig!==lastSig){ lastSig=sig; const y=window.scrollY; renderMods(); window.scrollTo(0,y); }
+    if(!$('t-wall').hidden) renderWall();
+    tick();
+  }
+  function tick(){ if(!st) return; const l=left(st.hall); $('tm').textContent=fmt(l); $('tm').classList.toggle('low',l<=120); }
+
+  importHash();
+  fetch('api/info').then(r=>r.ok?r.json():null).catch(()=>null).then(info=>{
+    HALL=!!(info&&info.app==='neurokreativ'); SITE=(info&&info.site)||'';
+    document.body.classList.toggle('offline',!HALL);
+    if(me&&me.id) start(); else showJoin();
+  });
+})();
+</script>
+</body>
+</html>
