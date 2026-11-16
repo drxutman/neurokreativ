@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Нейрокреатив · панель</title>
+<title>Нейрокреативы · панель</title>
 <link rel="stylesheet" href="app.css">
 <style>
 .top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--soft);padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -142,7 +142,7 @@ body.offline .res,body.offline .tm,body.offline .net,body.offline [data-t=wall]{
 <body>
 <section id="join" class="join" hidden>
   <div class="zal" id="zalbox" hidden><h2>Вы на интенсиве</h2><p>Нажмите, чтобы войти в панель зала: в ней шаги, таймер и сдача работ на большой экран.</p><a class="pill" id="zal-go" href="#">Войти в панель зала</a></div>
-  <h1>Нейрокреатив</h1>
+  <h1>Нейрокреативы</h1>
   <p style="color:var(--muted)">Ваша панель на весь день. Здесь шаги, готовые промпты под ваш бизнес и сдача работ на большой экран. Ничего не нужно уметь: идём вместе, по одному шагу.</p>
   <div class="promise"><b>Что вы унесёте домой</b><span id="j-result"></span></div>
   <form id="join-form">
@@ -267,7 +267,7 @@ body.offline .res,body.offline .tm,body.offline .net,body.offline [data-t=wall]{
     $('tools').innerHTML=Object.values(P.tools||{}).filter(t=>t.u||t.n!=='Эта панель').map(chip).join('');
     if(!HALL){
       // постоянный адрес: без сервера, всё хранится в браузере участника
-      $('blk').textContent='Нейрокреатив'; $('nxt').textContent='ваша панель, всегда по этому адресу';
+      $('blk').textContent='Нейрокреативы'; $('nxt').textContent='ваша панель, всегда по этому адресу';
       $('zalbar').hidden=!ZAL;
       $('home-txt').textContent='Эта страница всегда открывается по этому адресу, бренд-карта хранится в вашем браузере. Сохраните её в закладки. Книга промптов — то же самое одним файлом.';
       renderCard(); renderMods(); return;
@@ -409,13 +409,13 @@ body.offline .res,body.offline .tm,body.offline .net,body.offline [data-t=wall]{
   // ---------- книга промптов ----------
   $('book').onclick=()=>{
     const d=data(), L=[];
-    L.push('КНИГА ПРОМПТОВ · '+me.name,'Интенсив «Нейрокреатив», '+new Date().toLocaleDateString('ru-RU'),'','Как пользоваться: скопируйте промпт и вставьте в нейросеть. Хотите другой кадр — поменяйте слова в бренд-карте ниже и в промпте.','');
+    L.push('КНИГА ПРОМПТОВ · '+me.name,'Интенсив «Нейрокреативы», '+new Date().toLocaleDateString('ru-RU'),'','Как пользоваться: скопируйте промпт и вставьте в нейросеть. Хотите другой кадр — поменяйте слова в бренд-карте ниже и в промпте.','');
     L.push('МОЯ БРЕНД-КАРТА'); P.fields.forEach(f=>L.push('· '+f.l+': '+((card[f.k]||'').trim()||f.def)));
     L.push('','ФОРМУЛА КАДРА (ставьте в конец любого промпта для картинок)',fillTxt(P.tail,d),'');
     P.modules.forEach(m=>{ L.push('','==== '+m.n+' · '+m.t.toUpperCase()+' ===='); m.steps.forEach(s=>{ const ps=prompts(s); if(!ps.length) return; L.push('',(s.b?'★ ':'')+s.h+(s.w&&tool(s.w)?' — '+tool(s.w).n:'')); ps.forEach(v=>{ if(v.l) L.push('['+v.l+']'); L.push(v.p.includes('{vyzov}')&&!d.vyzov?fillTxt(v.p,Object.assign({},d,{vyzov:'ЛЮБОЙ СТИЛЬ, НАПРИМЕР: '+P.cards[0]})):fillTxt(v.p,d)); }); }); });
     L.push('','==== ПЛАН НА НЕДЕЛЮ ====',...(P.after||[]));
     const blob=new Blob(['﻿'+L.join('\n')],{type:'text/plain;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Нейрокреатив — промпты — '+me.name+'.txt'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Нейрокреативы — промпты — '+me.name+'.txt'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
     toast('Файл в папке «Загрузки»');
   };
 
