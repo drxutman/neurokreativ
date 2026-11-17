@@ -17,11 +17,12 @@ window.PROGRAM = (function () {
     result: "Главный кадр, карусель, рилс и персонаж вашего бренда, готовые к публикации, и личная книга промптов",
     // Нейросети дня. n — как называть, u — ссылка (откроется в новой вкладке). Пустая ссылка — просто подпись.
     tools: {
-      chat: { n: "ChatGPT или Claude", u: "https://chatgpt.com" },
-      img: { n: "ChatGPT или Gemini", u: "https://gemini.google.com" },
-      vid: { n: "Gemini", u: "https://gemini.google.com" },
-      deck: { n: "Figma или Canva", u: "https://www.figma.com" },
-      edit: { n: "Canva", u: "https://www.canva.com" },
+      // Схема дня: одна нейросеть с подпиской (ChatGPT Plus или Claude Pro), Canva, Figma и Google подключены к ней плагинами.
+      chat: { n: "Ваша нейросеть (ChatGPT или Claude)", u: "" },
+      img: { n: "Ваша нейросеть (в Claude — через плагин Canva)", u: "" },
+      vid: { n: "Ваша нейросеть + плагин Canva", u: "" },
+      deck: { n: "Ваша нейросеть + плагин Figma или Canva", u: "" },
+      edit: { n: "Плагин Canva в вашей нейросети", u: "" },
       panel: { n: "Эта панель", u: "" }
     },
     // Бренд-карта. main — главные поля, остальные спрятаны в «Тонкую настройку».
