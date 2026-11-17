@@ -17,11 +17,11 @@ window.PROGRAM = (function () {
     result: "Главный кадр, карусель, рилс и персонаж вашего бренда, готовые к публикации, и личная книга промптов",
     // Нейросети дня. n — как называть, u — ссылка (откроется в новой вкладке). Пустая ссылка — просто подпись.
     tools: {
-      chat: { n: "Чат ИИ", u: "" },
-      img: { n: "Генератор картинок", u: "" },
-      vid: { n: "Генератор видео", u: "" },
-      deck: { n: "Генератор презентаций", u: "" },
-      edit: { n: "Редактор (телефон или Canva)", u: "" },
+      chat: { n: "ChatGPT или Claude", u: "https://chatgpt.com" },
+      img: { n: "ChatGPT или Gemini", u: "https://gemini.google.com" },
+      vid: { n: "Gemini", u: "https://gemini.google.com" },
+      deck: { n: "Figma или Canva", u: "https://www.figma.com" },
+      edit: { n: "Canva", u: "https://www.canva.com" },
       panel: { n: "Эта панель", u: "" }
     },
     // Бренд-карта. main — главные поля, остальные спрятаны в «Тонкую настройку».
